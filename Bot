@@ -1,0 +1,63 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+import time
+import os
+from flask import Flask
+
+# إعداد Flask
+app = Flask(__name__)
+
+# إعدادات المتصفح
+options = Options()
+options.add_argument("--user-data-dir=./User_Data")
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+
+# فتح المتصفح
+driver = webdriver.Chrome(options=options)
+driver.get("https://web.whatsapp.com")
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+@app.route('/start')
+def start_bot():
+    print("سكان الكود QR من الهاتف ديالك...")
+    time.sleep(20)  # وقت للسكان
+
+    # قائمة الأوامر
+    commands = {
+        ".menu": "Available Commands:\n.menu\n.tools\n.ddos\n.info\n.help",
+        ".tools": "Top Hacking Tools:\n- Nmap\n- Metasploit\n- SQLmap\n- Wireshark",
+        ".ddos": "DDoS info:\nUse responsibly! Try tools like LOIC, HOIC, Hulk",
+        ".info": "Bot by Moroccan Dev | Ethical Hacking",
+        ".help": "Write any command starting with . (dot) to get response."
+    }
+
+    # المراقبة والرد
+    while True:
+        try:
+            chats = driver.find_elements(By.CLASS_NAME, '_2aBzC')
+            for chat in chats:
+                chat.click()
+                time.sleep(2)
+                messages = driver.find_elements(By.CLASS_NAME, '_21Ahp')
+                if messages:
+                    last_msg = messages[-1].text.lower()
+                    for cmd, response in commands.items():
+                        if cmd in last_msg:
+                            input_box = driver.find_element(By.CLASS_NAME, '_3Uu1_')
+                            input_box.send_keys(response + "\n")
+                            input_box.send_keys(u'\ue007')  # Enter
+                            break
+                time.sleep(5)
+        except Exception as e:
+            print("خطأ:", e)
+            time.sleep(10)
+
+# تحديد المنفذ
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 3000)))
